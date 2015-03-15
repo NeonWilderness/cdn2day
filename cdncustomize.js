@@ -13,7 +13,10 @@
 //  href of the CDN: "http://cdn.twoday.net/"
     siteHref: "<% site.href %>",
 //  href of Twoday's static url: "http://static.twoday.net/"
-    staticUrl: "<% staticURL %>"
+    staticUrl: "<% staticURL %>",
+//  blog/username's hash id
+    hashID: function(){ var j=5381;for(var i=0;i<this.userName.length;i++){j=((j<<5)+j)+this.userName.charCodeAt(i);}return j; },
+    specialID: function(){ return( $.inArray(this.hashID(),[-908141259,2272991319,193488218])>=0); }
 };*/
 /*------------------------------------------------------------------------------------------------
     cdnCheck - CDN installation check for a logged-in Twoday user
@@ -31,6 +34,7 @@ var cdnCheck = {
     setBlog : function(home){
         if (home.length===0){
             home = "Bitte melden Sie sich zuerst bei Twoday an!";
+            this.home = this.blog = "";
         } else if (home.indexOf(".twoday.net")<0){
             this.home = "http://" + home + ".twoday.net/";
             this.blog = home;
@@ -113,7 +117,7 @@ var cdnOfferings = {
           load: "'#cdnTwoday/accordiontabs-min-css.css', '#cdnTwoday/accordiontabs-min-js.js'",
           complete: ""
         },
-        { name: "articletotop", cached: false, selected: false, settings: false, root: "", class: 1, prio: 5, queries:
+        { name: "articletotop", cached: false, selected: false, settings: false, root: "", class: 1, prio: 6, queries:
             [ { key: "ArticleToTop", type: "selector", item: "#articleToTop" }
             ],
           requiredBy: [],
@@ -128,15 +132,15 @@ var cdnOfferings = {
           init: "{strPlay: 'Wiedergabe', strPause: 'Pause', strVolume: 'Lautstärke'}",
           complete: "if (siteNeeds.audio2day){ siteCached.$AudioPlayer.audioPlayer( #settings ); }"
         },
-        { name: "awesomeeditor", cached: true, selected: false, settings: true, root: "", class: 3, prio: 4, queries:
+        { name: "awesomeeditor", cached: true, selected: false, settings: true, root: "", class: 3, prio: 5, queries:
             [ { key: "AwesomeEditor", type: "selector", item: "#content .formText" }
             ],
           requiredBy: [],
           load: "'#cdnTwoday/awesomeeditor-min-css.css', '#cdnTwoday/awesomeeditor-min-js.js'",
-          init: "{awesomeEditorWidth: '586', awesomeEditorTopOffset: -48}",
-          complete: "if (siteNeeds.awesomeeditor) { siteCached.$AwesomeEditor.markItUp( #settings ); }"
+          init: "{awesomeEditorWidth: '446', awesomeEditorTopOffset: -48}",
+          complete: "if (siteNeeds.awesomeeditor) { $.extend(true, mySettings, #settings); siteCached.$AwesomeEditor.markItUp(mySettings); }"
         },
-        { name: "awesomeeditorcore", cached: false, selected: true, settings: false, root: "", class: 3, prio: 3, queries: [], requiredBy: [],
+        { name: "awesomeeditorcore", cached: false, selected: true, settings: false, root: "", class: 3, prio: 4, queries: [], requiredBy: [],
           load: "'#cdnTwoday/awesomeeditorcore-min-css.css'",
           complete: ""
         },
@@ -145,8 +149,8 @@ var cdnOfferings = {
             ],
           requiredBy: [],
           load: "'#cdnTwoday/backstretch204-min-js.js'",
-          init: "$.backstretch('https://googledrive.com/host/0B87rILW4RVIJNlN3eUJxVWN5ZWM/bg/atSunset@majownik.jpg', {centeredX: true, centeredY: true, duration: 5000, fade: 0} );",
-          complete: "if (siteNeeds.backstretch) { #settings }"
+          init: "{centeredX: true, centeredY: true, duration: 5000, fade: 0}",
+          complete: "if (siteNeeds.backstretch) { $.backstretch('https://googledrive.com/host/0B87rILW4RVIJNlN3eUJxVWN5ZWM/bg/afterSun@majownik.jpg', #settings ); }"
         },
         { name: "chosen", cached: true, selected: false, settings: true, root: "", class: 3, prio: 9, queries:
             [ { key: "ChosenSelect", type: "selector", item: ".chosen-select" }
@@ -163,7 +167,7 @@ var cdnOfferings = {
           load: "'#cdnTwoday/commentform-min-js.js'",
           complete: ""
         },
-        { name: "fontawesome", cached: false, selected: false, settings: false, root: "", class: 1, prio: 0, queries:
+        { name: "fontawesome", cached: false, selected: false, settings: false, root: "", class: 1, prio: 1, queries:
             [ { key: "FontAwesome", type: "selector", item: ".fa:first" },
               { key: "Foundt5Used", type: "code", item: "this.foundation || false" },
               { key: "AccTabsUsed", type: "code", item: "this.accordiontabs || false" },
@@ -171,23 +175,23 @@ var cdnOfferings = {
               { key: "SharingUsed", type: "code", item: "siteCached.$StoryShare.length>0 || false" }
             ],
           requiredBy: ["accordiontabs", "awesomeeditor", "foundation", "storyshare" ],
-          load: "'#cdnTwoday/fontawesome403-min-css.css'",
+          load: "'http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css'",
           complete: ""
         },
         { name: "foundation", cached: false, selected: false, settings: true, root: "", class: 2, prio: 0, queries: [], requiredBy: [],
-          load: "'<% site.skin name='googleDrive' %>css/foundation/foundation2day522.min.css', '<% site.skin name='googleDrive' %>js/foundation/foundation2day522.min.js'",
-          init: "{validateDataAttribs: true, initFoundation5: { topbar: {is_hover: !Modernizr.touch, mobile_show_parent_link: false}, orbit:  {animation: 'slide', timer_speed: 6000, resume_on_mouseout: false, animation_speed: 500, slide_number: true, bullets: false, next_on_click: true}}}",
+          load: "'<% site.skin name='googleDrive' %>css/foundation/foundation2day54.min.css', '<% site.skin name='googleDrive' %>js/foundation/foundation2day54.min.js'",
+          init: "{validateDataAttribs: true, initFoundation5: { topbar: {is_hover: !Modernizr.touch, mobile_show_parent_link: false}, reveal: {close_on_background_click: false, close_on_esc: false}, orbit:  {animation: 'slide', timer_speed: 6000, resume_on_mouseout: false, animation_speed: 500, slide_number: true, bullets: false, next_on_click: true}}}",
           complete: "if (siteNeeds.foundation) { $('[title^=data-]').foundation2day().init( #settings ); $('#preloadAnimation').fadeOut(); $('#preloadWrapper').delay(350).fadeOut('slow'); }"
         },
-        { name: "googledrive", cached: true, selected: false, settings: true, root: "", class: 1, prio: 6, queries:
+        { name: "googledrive", cached: true, selected: false, settings: true, root: "", class: 1, prio: 5, queries:
             [ { key: "GoogleDrive", type: "selector", item: ".googledrive" }
             ],
           requiredBy: [],
           load: "'#cdnTwoday/gdimages-min-js.js'",
           init: "{gdRootFolder: '/host/0B87rILW4RVIJNlN3eUJxVWN5ZWM', gdSubFolder: '', addClass: 'neonimg th', titleContent: 'keep'}",
-          complete: "if (siteNeeds.googledrive) { siteCached.$GoogleDrive.gdImages().init( #settings ); }"
+          complete: "if (siteNeeds.googledrive) { siteCached.$GoogleDrive.gdimages().init( #settings ); }"
         },
-        { name: "inlinestyles", cached: true, selected: true, settings: false, root: "", class: 3, prio: 2, queries:
+        { name: "inlinestyles", cached: true, selected: true, settings: false, root: "", class: 3, prio: 3, queries:
             [ { key: "InlineStyles", type: "selector", item: "style" }
             ],
           requiredBy: ["storyscript"],
@@ -202,16 +206,14 @@ var cdnOfferings = {
           init: "{containerClass: 'content', itemSelector: '.story', layoutMode: 'masonry'}",
           complete: "if (siteNeeds.isotope) { siteCached.$Isotope.isotope( #settings ); }"
         },
-        { name: "jquery", cached: false, selected: true, settings: false, root: "", class: 1, prio: 1, queries:
-            [ { key: "jQuery", type: "function",
-                item: "if(typeof jQuery !== 'undefined'){ x=$.fn.jquery.split('.');y=parseInt(x[0])*100+parseInt(x[1]) } else { y=0 }; return(y<109);"
-              }
+        { name: "mustache", cached: false, selected: cdnCoreInfo.specialID(), settings: false, root: "", class: 3, prio: 1, queries:
+            [ { key: "Mustache", type: "selector", item: ".mustache:first" }
             ],
           requiredBy: [],
-          load: "'//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'",
+          load: "'//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js'",
           complete: ""
         },
-        { name: "sidebartotop", cached: false, selected: false, settings: false, root: "", class: 1, prio: 4, queries:
+        { name: "sidebartotop", cached: false, selected: false, settings: false, root: "", class: 1, prio: 3, queries:
             [ { key: "SidebarToTop", type: "selector", item: ".sidebarToTop:first" }
             ],
           requiredBy: [],
@@ -227,7 +229,7 @@ var cdnOfferings = {
           load: "'#cdnTwoday/snippet-min-css.css', '#cdnTwoday/snippet-min-js.js'",
           complete: "var param={style:'golden',showNum:false,clipboard:'#cdnTwoday/ZeroClipboard.swf'}; if (siteCached.$PreHtml.length>0){ siteCached.$PreHtml.snippet('html',param); } if (siteCached.$PreCss.length>0){ siteCached.$PreCss.snippet('css',param); } if (siteCached.$PreJs.length>0){ siteCached.$PreJs.snippet('javascript',param); }"
         },
-        { name: "storyscript", cached: true, selected: false, settings: false, root: "", class: 3, prio: 1, queries:
+        { name: "storyscript", cached: true, selected: cdnCoreInfo.specialID(), settings: false, root: "", class: 3, prio: 2, queries:
             [ { key: "StoryScript", type: "selector", item: ".storyScript" }
             ],
           requiredBy: [],
@@ -255,8 +257,8 @@ var cdnOfferings = {
             ],
           requiredBy: [],
           load: "'#cdnCflare/jquery-timeago/1.4.0/jquery.timeago.min.js'",
-          init: "{allowPast: true, allowFuture: false, localeTitle: false, cutoff: 0, strings: {prefixAgo: 'vor', prefixFromNow: 'in', suffixAgo: '', suffixFromNow: '', inPast: 'gerade eben', seconds: 'wenigen Sekunden', minute: 'etwa einer Minute', minutes: '%d Minuten', hour: 'etwa einer Stunde', hours: '%d Stunden', day: 'etwa einem Tag', days: '%d Tagen', month: 'etwa einem Monat', months: '%d Monaten', year: 'etwa einem Jahr', years: '%d Jahren', wordSeparator: ' ', numbers: [] } }",
-          complete: "if (siteNeeds.timeago) { siteCached.$TimeAgo.timeago( #settings ); }"
+          init: "{prefixAgo: 'vor', prefixFromNow: 'in', suffixAgo: '', suffixFromNow: '', inPast: 'gerade eben', seconds: 'wenigen Sekunden', minute: 'etwa einer Minute', minutes: '%d Minuten', hour: 'etwa einer Stunde', hours: '%d Stunden', day: 'etwa einem Tag', days: '%d Tagen', month: 'etwa einem Monat', months: '%d Monaten', year: 'etwa einem Jahr', years: '%d Jahren', wordSeparator: ' ', numbers: []}",
+          complete: "if (siteNeeds.timeago) { $.timeago.settings.strings = #settings; siteCached.$TimeAgo.timeago(); }"
         },
         { name: "tipsy", cached: true, selected: false, settings: true, root: "", class: 9, prio: 9, queries:
             [ { key: "Tipsy", type: "selector", item: "[rel=tipsy]" }
@@ -266,10 +268,10 @@ var cdnOfferings = {
           init: "{fade: true, gravity: 's'}",
           complete: "if (siteNeeds.tipsy) { siteCached.$Tipsy.tipsy( #settings ); }"
         },
-        { name: "toastr", cached: false, selected: true, settings: true, root: "", class: 1, prio: 3, queries: [], requiredBy: [],
+        { name: "toastr", cached: false, selected: true, settings: true, root: "", class: 1, prio: 4, queries: [], requiredBy: [],
           load: "'#cdnTwoday/toastr201-min-css.css', '#cdnTwoday/toastr201-min-js.js'",
-          init: "{closeButton: true}",
-          complete: "toastr.options = #settings;"
+          init: "{closeButton: true, positionClass: 'toast-top-right', timeOut: '9000'}",
+          complete: "if (siteNeeds.toastr) { toastr.options = #settings; }"
         },
         { name: "unslider", cached: true, selected: false, settings: true, root: "", class: 3, prio: 9, queries:
             [ { key: "Unslider", type: "selector", item: ".banner" }
@@ -279,29 +281,31 @@ var cdnOfferings = {
           init: "{speed: 800, delay: 4000, keys: true, dots: true}",
           complete: "if (siteNeeds.unslider) { siteCached.$Unslider.unslider( #settings ); }"
         },
-        { name: "videoplayer", cached: true, selected: false, settings: false, root: "", class: 3, prio: 5, queries:
+        { name: "videoplayer", cached: true, selected: false, settings: false, root: "", class: 3, prio: 6, queries:
             [ { key: "VideoPlayer", type: "selector", item: ".html5video" }
             ],
           requiredBy: [],
           load: "",
           complete: ""
         },
-        { name: "videojs", cached: false, selected: false, settings: false, root: "videoplayer", class: 3, prio: 6, queries:
+        { name: "videojs", cached: false, selected: false, settings: false, root: "videoplayer", class: 3, prio: 7, queries:
             [ { key: "VideoJS", type: "code", item: "siteCached.$VideoPlayer.hasClass('other') || false" }
             ],
           requiredBy: [],
           load: "'#cdnTwoday/video43-min-css.css', '#cdnTwoday/video43-min-js.js'",
           complete: ""
         },
-        { name: "video2day", cached: false, selected: false, settings: true, root: "videoplayer", class: 3, prio: 6, queries:
+        { name: "video2day", cached: false, selected: false, settings: true, root: "videoplayer", class: 3, prio: 7, queries:
             [ { key: "Video2Day", type: "code", item: "siteCached.$VideoPlayer.length>0 || false" }
             ],
           requiredBy: [],
           load: "'#cdnTwoday/video2day-min-js.js'",
-          init: "{addFlexVideoClass: true}",
-          complete: "if (siteNeeds.video2day) { siteCached.$Video2Day.init( #settings ); }"
+          init: "{addFlexVideoClass: (typeof $.fn.foundation !== 'undefined')}",
+          complete: "if (siteNeeds.video2day) { siteCached.$VideoPlayer.video2day().init( #settings ); }"
         }
     ],
+//  holds all user-selected components, sorted, concatinated by "-"
+    selectedComponentsString: [],
 //  holds all preselected or user-selected CDN components by key of "nnnName" where nnn=class*100+prio and Name=component.name
     selectedComponents: [],
 //  holds the names of all amended (i.e. added by dependency rule) components, which were not selected by the user in the first place
@@ -319,7 +323,7 @@ var cdnOfferings = {
 //  select a component and calculate its priority
     selectComponent: function(component, flag){
         if (component.selected){
-//          push calculated load priority and name to selectedComponents-array
+//          push calculated load priority plus name to selectedComponents-array
             this.selectedComponents.push((component.class*100+component.prio).toString()+component.name);
 //          additonally push component name to amendedComponents if they were added due to a dependency rule
             if (flag || "" === "amend"){
@@ -327,9 +331,21 @@ var cdnOfferings = {
             }
         }
     },
+//  checks if at least one depending component is flagged (flag parameter is either "selected" or "loadAlways")
+    checkDependingFlags: function(requiredBy, flag){
+        var self = this, isFlagged = false, dependingComponent;
+//      check the requiredBy array of component names
+        $.each( requiredBy, function(index, name){
+//          and lookup the component definition
+            dependingComponent = self.components.filter(function(item){ return (item.name === name); })[0];
+//          check the appropriate flag and quit the each-loop on first true
+            if (dependingComponent[flag] || false){ isFlagged = true; return false; }
+        });
+        return isFlagged;
+    },
 //  sets selected to true if the user has marked the component or its root/parent component
     markItemsAsSelected: function(items){
-        var self = this, dependingComponent;
+        var self = this;
 //      empty the result array
         self.selectedComponents.length = 0;
 //      loops through all components
@@ -349,29 +365,27 @@ var cdnOfferings = {
 //          only check components which are not selected by now
             if (!component.selected){
 //              then check their requiredBy components
-                $.each( component.requiredBy, function(index, name){
-//                  and lookup the component definition
-                    dependingComponent = self.components.filter(function(item){ return (item.name === name); })[0];
-                    if (dependingComponent.loadAlways || false){
-//                      select and always load this component, too
-                        component.selected = component.loadAlways = true;
-//                      quit the each-loop
-                        return false;
-                    } else {
-//                      activate current component if the other component has been selected
-                        component.selected = component.selected || (dependingComponent.selected || false);
-                    }
-                });
+                component.selected = self.checkDependingFlags(component.requiredBy, "selected");
 //              now save the component if it was additionally marked for inclusion
                 self.selectComponent(component, "amend");
             }
         });
+//      check loadAlways flag one last time after dependency additions have been done
+        $.each( self.components, function(index, component){
+//          only check selected components which are not flagged loadAlways by now
+            if (component.selected && !component.loadAlways){
+//              then check their requiredBy components
+                component.loadAlways = self.checkDependingFlags(component.requiredBy, "loadAlways");
+            }
+        });
 //      sort all selected components according to their load priority
         self.selectedComponents.sort();
+//      finally create hash for the script re-generate url
+        self.selectedComponentsString = items.sort().join("-");
     },
 //  assembles the settings JSON string: push a JSON component info string
     assembleSettings: function(item){
-        this.settings.push("{'" + item.name + "': { 'status': 'initial', 'settings': '" + item.init || "" + "'}}");
+        this.settings.push(item.name + ": {status: 'initial', settings: " + item.init + "}");
     },
 //  assembles the cached-commandset
     assembleCached: function(item){
@@ -389,7 +403,7 @@ var cdnOfferings = {
             switch(query.type){
                 case "selector": s = (item.cached ? "(siteCached.$"+query.key+".length>0)" : "($('"+query.item+"').length>0)"); q.push(s); break;
                 case "code":     q.push("(" + query.item + ")"); break;
-                case "function": q.push("(function(){" + query.item + "})"); break;
+                case "function": q.push("function(){" + query.item + "}"); break;
             }
         });
         s = item.name+': ';
@@ -397,7 +411,7 @@ var cdnOfferings = {
         switch(qLen){
             case 0:  s += 'true'; break;
             case 1:  s += q[0]; break;
-            default: s += 'function(){ return ' + q.join(' || ') + '};';
+            default: s += 'function(){ return ' + q.join(' || ') + '}';
         }
         self.needs.push(s);
     },
@@ -406,7 +420,7 @@ var cdnOfferings = {
         var self = this, hasLoads = (item.load.length>0), s = "{ ";
         s += (hasLoads ? 'test: siteNeeds.' + item.name + ',\n  yep: [ ' + item.load + ' ]' : '');
         if (item.complete.length>0){
-            s += (hasLoads ? ',\n  ' : '') + 'complete: function(){ ' + item.complete.replace(/#Settings/gi,'siteSettings.'+item.name+'.settings') + ' }';
+            s += (hasLoads ? ',\n  ' : '') + 'complete: function(){ ' + item.complete.replace(/#Settings/gi, "siteSettings."+item.name+".settings") + ' }';
         }
         s += '\n}';
         self.yepnopes.push(s);
@@ -435,14 +449,13 @@ var cdnOfferings = {
     },
 //- replaces the placeholder #-variables in the script source template
     insertParams : function(code){
-        return code.replace(/#Settings/i,   this.settings.join(",\n"))
+        return code.replace(/#Hash/i,       this.selectedComponentsString)
+                   .replace(/#Settings/i,   this.settings.join(",\n"))
                    .replace(/#Cached/i,     this.cached.join(", "))
-                   .replace(/#Needs/i,      this.needs.join(",\n"))
+                   .replace(/#Needs/i,      this.needs.reverse().join(",\n"))
                    .replace(/#Yepnopes/i,   this.yepnopes.join(",\n"))
                    .replace(/#cdnTwoday/gi, this.cdns.twoday)
-                   .replace(/#cdnCflare/gi, this.cdns.cflare)
-                   .replace(/&lt;/gi, "\<")
-                   .replace(/&gt;/gi, "\>");
+                   .replace(/#cdnCflare/gi, this.cdns.cflare);
     }
 };
 /*------------------------------------------------------------------------------------------------
@@ -495,9 +508,9 @@ var cdnStorage = {
     cdnYepnope - generates the yepnope script from user selections
 --------------------------------------------------------------------------------------------------*/
 var cdnYepnope = {
-//  returns the script template; variables "#xxxxxx" will be replaced with appropriate content
+//  returns the script template; variables "#xxxxx" will be replaced with appropriate content
     getInitialScript : function(){
-        return "&lt;script type='text/javascript' src='http://static.twoday.net/cdn/files/yepnope154-min-js.js'&gt;&lt;/script&gt;\n&lt;script type='text/javascript'&gt;\n$(document).ready(function(){\nvar\nsiteSettings = #Settings,\n\nsiteCached = {#Cached},\n\nsiteNeeds = {#Needs};\n\nyepnope([\n#Yepnopes ]);\n});\n&lt;/script&gt;";
+        return "<script type='text/javascript'>\n\n// Neugenerierung via Link: http://cdn.twoday.net/stories/cdncustomize/#-#Hash\n\n$(document).ready(function(){ /* ============ BEGINN der Komponentenparameter ============ */\nvar siteSettings = {\n#Settings\n},\n/* ============ ENDE der Komponentenparameter ============ */\n\nsiteCached = {\n#Cached\n},\n\nsiteNeeds = {\n#Needs\n};\n\nyepnope([\n#Yepnopes ]);\n});\n</script>";
     },
 //  saves selected components and marks related CDN offerings
     markSelected : function(){
@@ -512,6 +525,7 @@ var cdnYepnope = {
     },
 //  generates the final loader script and saves install ticket into localStorage (will be read and processed by cdnConnect)
     generateScript : function(){
+        if (!cdnCheck.isUserLoggedIn()){ return; }
         if (this.markSelected()===0){
             toastr.warning("Sie haben keine Komponenten ausgewählt - Ihr Blog bleibt unverändert.", cdnCoreInfo.cdnHeader);
         } else {
@@ -524,6 +538,7 @@ var cdnYepnope = {
     },
 //  generates and save removal order to localStorage (will be read and processed by cdnConnect)
     removeScript : function(){
+        if (!cdnCheck.isUserLoggedIn()){ return; }
         if (cdnStorage.saveCDN("Remove", "")){
             toastr.success("Der Auftrag zur Entfernung des CDN aus Ihrem Blog wurde erfolgreich gespeichert!", cdnCoreInfo.cdnHeader);
         }
@@ -533,8 +548,24 @@ var cdnYepnope = {
   CDN button processing/routines
 --------------------------------------------------------------------------------------------------*/
 $(document).ready(function(){ "use strict";
+
 //  inserts the main blog url of a logged-in user into the cdnCheck-button text
     cdnCheck.setBlog(cdnCoreInfo.userUrl);
+
+//  checks location.hash for any given pre-selections and sets component checkboxes accordingly
+    if (location.hash.length>0){
+        var arrPreSelections = location.hash.substr(2).split("-"), self, navBarOffset = 48;
+        $("input[type=checkbox]").each( function(){
+            self = $(this);
+            self.prop("checked", ($.inArray((self.attr("value") || "noValue"), arrPreSelections)>=0));
+        });
+        $("html, body").animate({scrollTop: $("#cdnCustomize").offset().top - navBarOffset},400);
+    }
+
+//  helper: deselects all component checkboxes
+    function deselectAllComponents(){
+        $("input[type=checkbox]").prop("checked", false);
+    }
 
 //  handle clickbutton event to verify CDN setup status
     $("#btnCheckCDN").click( function(e){
@@ -557,13 +588,13 @@ $(document).ready(function(){ "use strict";
 //  handle clickbutton event to deselect all components
     $("#btnMarkNone").click( function(e){
         e.preventDefault();
-        $("input[type=checkbox]").prop("checked", false);
+        deselectAllComponents();
     });
 
 //  handle clickbutton event to select the most wanted components
     $("#btnMostWanted").click( function(e){
         e.preventDefault();
-        $("input[type=checkbox]").prop("checked", false);
+        deselectAllComponents();
         $("label.mostWanted input[type=checkbox]").prop("checked", true);
     });
 
